@@ -42,6 +42,9 @@
 
   .receitas {
     background-color: #f44336; /* Red */
+    display: block; /* Make the button a block-level element */
+    margin: 0 auto; /* Auto margins on the sides will center the button */
+  
   }
 
   .for-you {
