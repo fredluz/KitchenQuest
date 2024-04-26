@@ -26,12 +26,18 @@ recipe_ingredient = db.Table('recipe_ingredient',
 )
 
 def recommend_recipes():
-    available_ingredients = set(Ingredient.query.all())  # Get all ingredients in the pantry
+    available_ingredients = set(Ingredient.query.all())
     recommended_recipes = []
     for recipe in Recipe.query.all():
         if available_ingredients.issuperset(recipe.ingredients):
             recommended_recipes.append(recipe)
     return recommended_recipes
+
+# Route to display recommended recipes
+@app.route('/receitas')
+def receitas():
+    recommended_recipes = recommend_recipes()
+    return render_template('receitas.html', recipes=recommended_recipes)
 
 @app.route('/receitas')
 def receitas():
