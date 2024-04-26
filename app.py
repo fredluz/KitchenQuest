@@ -67,7 +67,7 @@ def receitas():
         # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            recipes = data['meals']
+            recipes = data.get('meals', [])
         else:
             recipes = []
     else:

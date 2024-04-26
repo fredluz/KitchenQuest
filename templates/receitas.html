@@ -13,19 +13,17 @@
         <button type="submit">Search</button>
     </form>
     
-    <h1>Recommended Recipes</h1>
-    <ul>
-        {% for recipe in recipes %}
-            <li>{{ recipe.name }}</li>
-            <p>Ingredients:</p>
-            <ul>
-                {% for ingredient in recipe.ingredients %}
-                    <li>{{ ingredient }}</li>
-                {% endfor %}
-            </ul>
-            <p>Instructions:</p>
-            <p>{{ recipe.instructions }}</p>
-        {% endfor %}
+    {% if recipes %}
+        <h1>Recommended Recipes</h1>
+        <ul>
+            {% for recipe in recipes %}
+                <li>{{ recipe.strMeal }}</li>
+                <!-- Include other recipe details here -->
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No recipes found.</p>
+    {% endif %}
     </ul>
 </body>
 </html>
