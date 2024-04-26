@@ -18,6 +18,14 @@ def dispensa():
     ingredients = Ingredient.query.all()
     return render_template('dispensa.html', ingredients=ingredients)
 
+@app.route('/social')
+def dispensa():
+    return render_template('social.html', ingredients=ingredients)
+
+@app.route('/foryou')
+def dispensa():
+    return render_template('foryou.html', ingredients=ingredients)
+
 @app.route('/add', methods=['POST'])
 def add_ingredient():
     code = request.form.get('code')
