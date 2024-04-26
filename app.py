@@ -57,19 +57,25 @@ def receitas():
 def receitas():
     if request.method == 'GET':
         # Get the ingredient entered by the user from the form
-        ingredients = request.args.get('ingredient')
+        query = request.args.get('query')
 
         # Make a request to the recipe API with the new ingredient parameter
-        
-        url = f'https://www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
-        response = requests.get(url)
+        api_url = 'https://api.api-ninjas.com/v1/recipe?query={}'.format(query)
+        headers = {'X-Api-Key': 'fu5PEROkHGyBvuAVmwP2fg==2Vzh8WiMIidH9W80'}  # Replace 'YOUR_API_KEY' with your actual API key
+        response = requests.get(api_url, headers=headers)
 
         # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            recipes = data.get('meals', [])
+            recipes = [{
+                'title': recipe['title'],
+                'ingredients': recipe['ingredients'],
+                'servings': recipe['servings'],
+                'instructions': recipe['instructions']
+            } for recipe in data.get('results', [])]
         else:
             recipes = []
+
     else:
         # If method is not GET, render the template without making an API request
         recipes = []

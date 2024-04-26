@@ -6,10 +6,9 @@
     <title>Receitas</title>
 </head>
 <body>
-    <a href="{{ url_for('index') }}" class="button receitas">Voltar</a>
     <form action="/receitas" method="GET">
-        <label for="ingredient">Ingredient:</label>
-        <input type="text" id="ingredient" name="ingredient" placeholder="Enter an ingredient">
+        <label for="query">Enter an ingredient:</label>
+        <input type="text" id="query" name="query" placeholder="Enter an ingredient">
         <button type="submit">Search</button>
     </form>
     
@@ -17,13 +16,16 @@
         <h1>Recommended Recipes</h1>
         <ul>
             {% for recipe in recipes %}
-                <li>{{ recipe.strMeal }}</li>
-                <!-- Include other recipe details here -->
+                <li>
+                    <h2>{{ recipe.title }}</h2>
+                    <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                    <p><strong>Servings:</strong> {{ recipe.servings }}</p>
+                    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+                </li>
             {% endfor %}
         </ul>
     {% else %}
         <p>No recipes found.</p>
     {% endif %}
-    </ul>
 </body>
 </html>
