@@ -1,20 +1,26 @@
+<!-- receitas.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receitas</title>
 </head>
 <body>
     <a href="{{ url_for('index') }}" class="button receitas">Voltar</a>
-    <h1>Receitas Recomendadas</h1>
+    <form action="/receitas" method="GET">
+        <label for="ingredient">Ingredient:</label>
+        <input type="text" id="ingredient" name="ingredient" placeholder="Enter an ingredient">
+        <button type="submit">Search</button>
+    </form>
+    
+    <h1>Recommended Recipes</h1>
     <ul>
         {% for recipe in recipes %}
             <li>{{ recipe.name }}</li>
             <p>Ingredients:</p>
             <ul>
                 {% for ingredient in recipe.ingredients %}
-                    <li>{{ ingredient.name }} - {{ ingredient.quantity }}</li>
+                    <li>{{ ingredient }}</li>
                 {% endfor %}
             </ul>
             <p>Instructions:</p>

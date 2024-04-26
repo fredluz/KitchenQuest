@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
@@ -34,10 +35,47 @@ def recommend_recipes():
     return recommended_recipes
 
 # Route to display recommended recipes
-@app.route('/receitas')
+""" @app.route('/receitas')
 def receitas():
-    recommended_recipes = recommend_recipes()
-    return render_template('receitas.html', recipes=recommended_recipes)
+    # Make a request to the recipe API (replace 'API_KEY' and 'INGREDIENTS' with your actual API key and parameters)
+    ingredients = 'INGREDIENTS'
+    url = f'www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
+    
+    response = requests.get(url)
+
+    # Parse JSON response
+    if response.status_code == 200:
+        data = response.json()
+        recipes = data['recipes']
+    else:
+        recipes = []
+
+    # Render template with recipe data
+    return render_template('receitas.html', recipes=recipes) """
+
+@app.route('/receitas', methods=['GET', 'POST'])
+def receitas():
+    if request.method == 'GET':
+        # Get the ingredient entered by the user from the form
+        ingredients = request.args.get('ingredient')
+
+        # Make a request to the recipe API with the new ingredient parameter
+        
+        url = f'www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
+        response = requests.get(url)
+
+        # Parse JSON response
+        if response.status_code == 200:
+            data = response.json()
+            recipes = data['recipes']
+        else:
+            recipes = []
+    else:
+        # If method is not GET, render the template without making an API request
+        recipes = []
+
+    # Render template with updated recipe data
+    return render_template('receitas.html', recipes=recipes)
 
 @app.route('/')
 def index():
