@@ -6,6 +6,7 @@
     <title>Receitas</title>
 </head>
 <body>
+    <a href="{{ url_for('index') }}" class="button receitas">Voltar</a>
     <h1>Receitas Recomendadas</h1>
     <ul>
         {% for recipe in recipes %}
