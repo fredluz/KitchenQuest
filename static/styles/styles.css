@@ -55,3 +55,10 @@
   .social {
     background-color: #2196F3; /* Blue */
   }
+
+  .centered {
+    text-align: center;
+    padding: 50px;
+    box-sizing: border-box;
+  }
+  
