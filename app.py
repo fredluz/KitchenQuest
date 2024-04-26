@@ -33,7 +33,7 @@ def recommend_recipes():
             recommended_recipes.append(recipe)
     return recommended_recipes
 
-app.route('/receitas')
+@app.route('/receitas')
 def receitas():
     recommended_recipes = recommend_recipes()
     return render_template('receitas.html', recipes=recommended_recipes)
