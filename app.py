@@ -13,6 +13,32 @@ class Ingredient(db.Model):
     quantity = db.Column(db.String(100), nullable=False)
     expiration_date = db.Column(db.String(100), nullable=False)
 
+class Recipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    instructions = db.Column(db.Text, nullable=False)
+    ingredients = db.relationship('Ingredient', secondary='recipe_ingredient', backref='recipes')
+
+# Define association table for many-to-many relationship
+recipe_ingredient = db.Table('recipe_ingredient',
+    db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'), primary_key=True),
+    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id'), primary_key=True)
+)
+
+def recommend_recipes():
+    available_ingredients = set(Ingredient.query.all())  # Get all ingredients in the pantry
+    recommended_recipes = []
+    for recipe in Recipe.query.all():
+        if available_ingredients.issuperset(recipe.ingredients):
+            recommended_recipes.append(recipe)
+    return recommended_recipes
+
+app.route('/receitas')
+def receitas():
+    recommended_recipes = recommend_recipes()
+    return render_template('receitas.html', recipes=recommended_recipes)
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
