@@ -2,23 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receitas</title>
+    <title>Pantry Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 </head>
 <body>
-    <h1>Receitas Recomendadas</h1>
-    <ul>
-        {% for recipe in recipes %}
-            <li>{{ recipe.name }}</li>
-            <p>Ingredients:</p>
-            <ul>
-                {% for ingredient in recipe.ingredients %}
-                    <li>{{ ingredient.name }} - {{ ingredient.quantity }}</li>
-                {% endfor %}
-            </ul>
-            <p>Instructions:</p>
-            <p>{{ recipe.instructions }}</p>
-        {% endfor %}
-    </ul>
+    <a href="{{ url_for('index') }}" class="button dispensa">Voltar</a>
+    <div class="content">
+    <form method="POST" action="/add">
+        <input type="text" name="name" placeholder="Ingredient Name" required>
+        <input type="text" name="quantity" placeholder="Quantity" required>
+        <input type="text" name="expiration_date" placeholder="Expiration Date" required>
+        <button type="submit" class="button receitas">Add Ingredient</button>
+    <table class="ingredient-table">
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Quantity</th>
+                <th>Expiration Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ingredient in ingredients %}
+            <tr>
+                <td>{{ ingredient.name }}</td>
+                <td>{{ ingredient.quantity }}</td>
+                <td>{{ ingredient.expiration_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // JavaScript for dynamic behavior (if needed)
+</script>
 </body>
 </html>
