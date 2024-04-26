@@ -38,7 +38,6 @@ def receitas():
     recommended_recipes = recommend_recipes()
     return render_template('receitas.html', recipes=recommended_recipes)
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
