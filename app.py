@@ -61,24 +61,24 @@ def receitas():
 
         # Make a request to the recipe API with the new ingredient parameter
         api_url = 'https://api.api-ninjas.com/v1/recipe?query={}'.format(query)
-        headers = {'X-Api-Key': 'fu5PEROkHGyBvuAVmwP2fg==2Vzh8WiMIidH9W80'}  # Replace 'YOUR_API_KEY' with your actual API key
+        headers = {'X-Api-Key': 'YOUR_API_KEY'}  # Replace 'YOUR_API_KEY' with your actual API key
         response = requests.get(api_url, headers=headers)
 
         # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            print(data)  # Inspect the JSON response
             recipes_data = data.get('results', [])  # Get the list of recipes
-            recipes = []  # Initialize an empty list to store formatted recipe data
+
+            # Format recipe data
+            recipes = []
             for recipe_data in recipes_data:
-                # Extract relevant information from each recipe data dictionary
                 recipe = {
                     'title': recipe_data.get('title', ''),
                     'ingredients': recipe_data.get('ingredients', ''),
                     'servings': recipe_data.get('servings', ''),
                     'instructions': recipe_data.get('instructions', '')
                 }
-                recipes.append(recipe)  # Append formatted recipe data to the recipes list
+                recipes.append(recipe)
         else:
             recipes = []
 
