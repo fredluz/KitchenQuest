@@ -37,7 +37,7 @@ def recommend_recipes():
 @app.route('/receitas')
 def receitas():
     recommended_recipes = recommend_recipes()
-    return render_template('receitas', recipes=recommended_recipes)
+    return render_template('receitas.html', recipes=recommended_recipes)
 
 @app.route('/')
 def index():
