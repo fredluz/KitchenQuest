@@ -8,17 +8,14 @@
 <body>
     <a href="{{ url_for('index') }}" class="button dispensa">Voltar</a>
     <div class="content">
-    <form method="POST" action="/add">
-        <input type="text" name="name" placeholder="Ingredient Name" required>
-        <input type="text" name="quantity" placeholder="Quantity" required>
-        <input type="text" name="expiration_date" placeholder="Expiration Date" required>
+    <form method="POST" action="/add_ingredient">
+        <input type="text" name="code" placeholder="code" required>
         <button type="submit" class="button receitas">Add Ingredient</button>
     <table class="ingredient-table">
         <thead>
             <tr>
                 <th>Ingredient</th>
                 <th>Quantity</th>
-                <th>Expiration Date</th>
             </tr>
         </thead>
         <tbody>
@@ -26,7 +23,6 @@
             <tr>
                 <td>{{ ingredient.name }}</td>
                 <td>{{ ingredient.quantity }}</td>
-                <td>{{ ingredient.expiration_date }}</td>
             </tr>
             {% endfor %}
         </tbody>
