@@ -67,12 +67,10 @@ def receitas():
         # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            print(data)  # Inspect the JSON response
-            recipes_data = data.get('results', [])  # Get the list of recipes
-
-            # Format recipe data
+            recipes_data = data  # Assign data directly to recipes_data
             recipes = []
             for recipe_data in recipes_data:
+                # Format recipe data
                 recipe = {
                     'title': recipe_data.get('title', ''),
                     'ingredients': recipe_data.get('ingredients', ''),
@@ -84,7 +82,6 @@ def receitas():
             recipes = []
 
     else:
-        # If method is not GET, render the template without making an API request
         recipes = []
 
     # Render template with updated recipe data
