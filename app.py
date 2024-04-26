@@ -61,7 +61,7 @@ def receitas():
 
         # Make a request to the recipe API with the new ingredient parameter
         
-        url = f'www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
+        url = f'https://www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
         response = requests.get(url)
 
         # Parse JSON response
