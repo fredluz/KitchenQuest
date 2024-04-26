@@ -67,12 +67,18 @@ def receitas():
         # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            recipes = [{
-                'title': recipe['title'],
-                'ingredients': recipe['ingredients'],
-                'servings': recipe['servings'],
-                'instructions': recipe['instructions']
-            } for recipe in data.get('results', [])]
+            print(data)  # Inspect the JSON response
+            recipes_data = data.get('results', [])  # Get the list of recipes
+            recipes = []  # Initialize an empty list to store formatted recipe data
+            for recipe_data in recipes_data:
+                # Extract relevant information from each recipe data dictionary
+                recipe = {
+                    'title': recipe_data.get('title', ''),
+                    'ingredients': recipe_data.get('ingredients', ''),
+                    'servings': recipe_data.get('servings', ''),
+                    'instructions': recipe_data.get('instructions', '')
+                }
+                recipes.append(recipe)  # Append formatted recipe data to the recipes list
         else:
             recipes = []
 
