@@ -19,12 +19,12 @@ def dispensa():
     return render_template('dispensa.html', ingredients=ingredients)
 
 @app.route('/social')
-def dispensa():
-    return render_template('social.html', ingredients=ingredients)
+def social():
+    return render_template('social.html')
 
 @app.route('/foryou')
-def dispensa():
-    return render_template('foryou.html', ingredients=ingredients)
+def foryou():
+    return render_template('foryou.html')
 
 @app.route('/add', methods=['POST'])
 def add_ingredient():
