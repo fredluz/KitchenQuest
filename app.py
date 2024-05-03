@@ -6,6 +6,8 @@ from sqlalchemy.orm.exc import NoResultFound
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pantry.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'key_maraca'  # Ensure to set a secure secret key.
+
 db = SQLAlchemy(app)
 
 @app.route('/dispensa')
@@ -67,11 +69,11 @@ def clear_ingredients():
     try:
         num_rows_deleted = db.session.query(Ingredient).delete()
         db.session.commit()
-        print(f'Deleted {num_rows_deleted} rows from Ingredients.', 'info')
+        flash(f'Deleted {num_rows_deleted} rows from Ingredients.', 'info')
         return redirect(url_for('dispensa'))
     except Exception as e:
         db.session.rollback()
-        print(f'Error clearing table: {str(e)}', 'error')
+        flash(f'Error clearing table: {str(e)}', 'error')
         return redirect(url_for('dispensa'))
 
 
