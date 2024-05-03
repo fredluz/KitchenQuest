@@ -60,6 +60,17 @@ def fetch_product(code):
      return {'generic_name': generic_name, 'quantity': quantity} 
     else:
         return  None
+    
+@app.route('/clear_ingredients')
+def clear_ingredients():
+    try:
+        num_rows_deleted = db.session.query(Ingredient).delete()
+        db.session.commit()
+        return f"Deleted {num_rows_deleted} rows from Ingredient.", 200
+    except Exception as e:
+        db.session.rollback()
+        return f"Error clearing table: {str(e)}", 500
+
 
 @app.route('/')
 def index():
