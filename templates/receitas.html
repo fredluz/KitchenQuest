@@ -1,0 +1,33 @@
+<!-- receitas.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receitas</title>
+</head>
+<body>
+    <form action="/receitas" method="GET">
+        <label for="query">Enter an ingredient:</label>
+        <input type="text" id="query" name="query" placeholder="Enter an ingredient">
+        <button type="submit">Search</button>
+    </form>
+    
+    {% if recipes %}
+        <h1>Recommended Recipes</h1>
+        <ul>
+            {% for recipe in recipes %}
+                <li>
+                    <h2>{{ recipe.title }}</h2>
+                    <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                    <p><strong>Servings:</strong> {{ recipe.servings }}</p>
+                    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No recipes found.</p>
+    {% endif %}
+    
+    <a href="{{ url_for('index') }}" class="button">Voltar</a>
+</body>
+</html>
