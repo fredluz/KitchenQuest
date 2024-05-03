@@ -34,23 +34,39 @@ def add_ingredient():
     code = request.form.get('code')
     product_data = fetch_product(code)
     if product_data:
-        expiration_date = product_data.get('expiration_date')
-        if expiration_date is None:
-            expiration_date = 'Unknown'  # Or handle this however makes sense for your application
-        ingredient = Ingredient(
-            name=product_data['generic_name'],
-            quantity=product_data['quantity'],
-            expiration_date=expiration_date
-        )
-        db.session.add(ingredient)
-        try:
-         db.session.commit()
-         return redirect(url_for('dispensa'))
-        except SQLAlchemy.exc.IntegrityError as e:
-            db.session.rollback()  # Roll back the session on error
-            return "There was an issue adding the ingredient: {}".format(e), 500
-    if product_data == None:
-        return "Failed to fetch product data", 404
+        generic_name = product_data['generic_name']
+        existing_ingredient = Ingredient.query.filter_by(name=generic_name).first()
+        if existing_ingredient:
+            # Ingredient exists, update quantity
+            try:
+                new_quantity = int(existing_ingredient.quantity.split()[0]) + int(product_data['quantity'].split()[0])
+                existing_ingredient.quantity = f"{new_quantity} {product_data['quantity'].split()[1]}"  # Assumes unit is always the same
+                db.session.commit()
+                flash('Ingredient quantity updated successfully!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error updating ingredient: {str(e)}', 'error')
+        else:
+            # No existing ingredient, create a new one
+            expiration_date = product_data.get('expiration_date', 'Unknown')
+            new_ingredient = Ingredient(
+                name=generic_name,
+                quantity=product_data['quantity'],
+                expiration_date=expiration_date
+            )
+            db.session.add(new_ingredient)
+            try:
+                db.session.commit()
+                flash('New ingredient added successfully!', 'success')
+            except SQLAlchemy.exc.IntegrityError as e:
+                db.session.rollback()
+                flash(f'There was an issue adding the ingredient: {str(e)}', 'error')
+        
+        return redirect(url_for('dispensa'))
+    else:
+        flash('Failed to fetch product data', 'error')
+        return redirect(url_for('add_ingredient'))
+
 def fetch_product(code):
     url = f"https://world.openfoodfacts.org/api/v2/product/{code}.json"
     response = requests.get(url)
