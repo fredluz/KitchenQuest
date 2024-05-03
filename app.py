@@ -1,6 +1,7 @@
 import requests
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm.exc import NoResultFound
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pantry.db'
@@ -61,15 +62,18 @@ def fetch_product(code):
     else:
         return  None
     
-@app.route('/clear_ingredients')
+@app.route('/clear_ingredients', methods=['POST'])
 def clear_ingredients():
     try:
         num_rows_deleted = db.session.query(Ingredient).delete()
         db.session.commit()
-        return f"Deleted {num_rows_deleted} rows from Ingredient.", 200
+        print(f'Deleted {num_rows_deleted} rows from Ingredients.', 'info')
+        return redirect(url_for('dispensa'))
     except Exception as e:
         db.session.rollback()
-        return f"Error clearing table: {str(e)}", 500
+        print(f'Error clearing table: {str(e)}', 'error')
+        return redirect(url_for('dispensa'))
+
 
 
 class Recipe(db.Model):
@@ -92,24 +96,6 @@ def recommend_recipes():
             recommended_recipes.append(recipe)
     return recommended_recipes
 
-# Route to display recommended recipes
-""" @app.route('/receitas')
-def receitas():
-    # Make a request to the recipe API (replace 'API_KEY' and 'INGREDIENTS' with your actual API key and parameters)
-    ingredients = 'INGREDIENTS'
-    url = f'www.themealdb.com/api/json/v1/1/filter.php?i={ingredients}'
-    
-    response = requests.get(url)
-
-    # Parse JSON response
-    if response.status_code == 200:
-        data = response.json()
-        recipes = data['recipes']
-    else:
-        recipes = []
-
-    # Render template with recipe data
-    return render_template('receitas.html', recipes=recipes) """
 
 @app.route('/receitas', methods=['GET', 'POST'])
 def receitas():
