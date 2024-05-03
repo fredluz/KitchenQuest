@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 </head>
 <body>
+    <form method="POST" action="/clear_ingredients">
+        <button type="submit" onclick="return confirm('Are you sure you want to delete all ingredients?');">Clear All Ingredients</button>
+    </form>
     <a href="{{ url_for('index') }}" class="button dispensa">Voltar</a>
     <div class="content">
     <form method="POST" action="/add_ingredient">
@@ -27,11 +30,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <form action="/clear_ingredients" method="post">
-        <button type="submit" onclick="return confirm('Are you sure you want to delete all ingredients?');">Clear All Ingredients</button>
-    </form>
+
     
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // JavaScript for dynamic behavior (if needed)
