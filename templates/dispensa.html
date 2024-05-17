@@ -11,32 +11,41 @@
     </form>
     <a href="{{ url_for('index') }}" class="button dispensa">Voltar</a>
     <div class="content">
-    <form method="POST" action="/add_ingredient">
-        <input type="text" name="code" placeholder="code" required>
-        <button type="submit" class="button receitas">Add Ingredient</button>
-    <table class="ingredient-table">
-        <thead>
-            <tr>
-                <th>Ingredient</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ingredient in ingredients %}
-            <tr>
-                <td>{{ ingredient.name }}</td>
-                <td>{{ ingredient.quantity }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <form method="POST" action="/add_ingredient">
+            <input type="text" name="code" placeholder="code" required>
+            <button type="submit" class="button receitas">Add Ingredient</button>
+        </form>
+        <form method="POST" action="/remove_ingredient">
+            <input type="text" name="ingredient_name" placeholder="Ingredient name" required>
+            <input type="number" name="quantity_to_remove" placeholder="Quantity to remove" required>
+            <button type="submit" class="button receitas">Remove Ingredient</button>
+        </form>
+        <form method="POST" action="/rename_ingredient">
+            <input type="text" name="current_name" placeholder="Current name" required>
+            <input type="text" name="new_name" placeholder="New name" required>
+            <button type="submit" class="button receitas">Rename Ingredient</button>
+        </form>
+        <table class="ingredient-table">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                <tr>
+                    <td>{{ ingredient.name }}</td>
+                    <td>{{ ingredient.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    // JavaScript for dynamic behavior (if needed)
-</script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // JavaScript for dynamic behavior (if needed)
+    </script>
 </body>
 </html>

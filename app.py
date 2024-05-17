@@ -10,6 +10,13 @@ app.secret_key = 'key_maraca'  # Ensure to set a secure secret key.
 
 db = SQLAlchemy(app)
 
+
+class Ingredient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(100), nullable=False)
+    expiration_date = db.Column(db.String(100), nullable=True)  # Allow NULL values
+
 @app.route('/dispensa')
 def dispensa():
     ingredients = Ingredient.query.all()
@@ -23,19 +30,17 @@ def social():
 def foryou():
     return render_template('foryou.html')
 
-class Ingredient(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    quantity = db.Column(db.String(100), nullable=False)
-    expiration_date = db.Column(db.String(100), nullable=True)  # Allow NULL values
-
 @app.route('/add_ingredient', methods=['POST'])
 def add_ingredient():
     code = request.form.get('code')
     product_data = fetch_product(code)
     if product_data:
+        product_id = product_data['id']
         generic_name = product_data['generic_name']
-        existing_ingredient = Ingredient.query.filter_by(name=generic_name).first()
+        
+        # Fetch the ingredient by its unique id
+        existing_ingredient = Ingredient.query.filter_by(id=product_id).first()
+        
         if existing_ingredient:
             # Ingredient exists, update quantity
             try:
@@ -50,6 +55,7 @@ def add_ingredient():
             # No existing ingredient, create a new one
             expiration_date = product_data.get('expiration_date', 'Unknown')
             new_ingredient = Ingredient(
+                id=product_id,
                 name=generic_name,
                 quantity=product_data['quantity'],
                 expiration_date=expiration_date
@@ -67,19 +73,71 @@ def add_ingredient():
         flash('Failed to fetch product data', 'error')
         return redirect(url_for('add_ingredient'))
 
+
+import requests
+
 def fetch_product(code):
     url = f"https://world.openfoodfacts.org/api/v2/product/{code}.json"
     response = requests.get(url)
     if response.ok:
-     data = response.json()
-     product = data.get('product', {})
-     generic_name = product.get('generic_name')
-     quantity = product.get('quantity')
-     # Return a dictionary with the data
-     return {'generic_name': generic_name, 'quantity': quantity} 
+        data = response.json()
+        product = data.get('product', {})
+        generic_name = product.get('generic_name')
+        quantity = product.get('quantity')
+        product_id = product.get('id')  # Fetch the unique id of the product
+        # Return a dictionary with the data
+        return {'id': int(product_id), 'generic_name': generic_name, 'quantity': quantity}
     else:
-        return  None
+        return None
+
     
+@app.route('/remove_ingredient', methods=['POST'])
+def remove_ingredient():
+    ingredient_name = request.form.get('ingredient_name')
+    quantity_to_remove = int(request.form.get('quantity_to_remove'))
+
+    existing_ingredient = Ingredient.query.filter_by(name=ingredient_name).first()
+    if existing_ingredient:
+        current_quantity = int(existing_ingredient.quantity.split()[0])
+        unit = existing_ingredient.quantity.split()[1]
+
+        if current_quantity > quantity_to_remove:
+            new_quantity = current_quantity - quantity_to_remove
+            existing_ingredient.quantity = f"{new_quantity} {unit}"
+            db.session.commit()
+            flash('Ingredient quantity updated successfully!', 'success')
+        elif current_quantity == quantity_to_remove:
+            db.session.delete(existing_ingredient)
+            db.session.commit()
+            flash('Ingredient removed successfully!', 'success')
+        else:
+            flash('Quantity to remove exceeds current quantity!', 'error')
+    else:
+        flash('Ingredient not found!', 'error')
+
+    return redirect(url_for('dispensa'))
+
+
+@app.route('/rename_ingredient', methods=['POST'])
+def rename_ingredient():
+    current_name = request.form.get('current_name')
+    new_name = request.form.get('new_name')
+
+    existing_ingredient = Ingredient.query.filter_by(name=current_name).first()
+    if existing_ingredient:
+        existing_ingredient.name = new_name
+        try:
+            db.session.commit()
+            flash('Ingredient renamed successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error renaming ingredient: {str(e)}', 'error')
+    else:
+        flash('Ingredient not found!', 'error')
+
+    return redirect(url_for('dispensa'))
+
+
 @app.route('/clear_ingredients', methods=['POST'])
 def clear_ingredients():
     try:
@@ -106,33 +164,20 @@ recipe_ingredient = db.Table('recipe_ingredient',
     db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id'), primary_key=True)
 )
 
-def recommend_recipes():
-    available_ingredients = set(Ingredient.query.all())
-    recommended_recipes = []
-    for recipe in Recipe.query.all():
-        if available_ingredients.issuperset(recipe.ingredients):
-            recommended_recipes.append(recipe)
-    return recommended_recipes
-
 
 @app.route('/receitas', methods=['GET', 'POST'])
 def receitas():
     if request.method == 'GET':
-        # Get the ingredient entered by the user from the form
         query = request.args.get('query')
-
-        # Make a request to the recipe API with the new ingredient parameter
         api_url = f'https://api.api-ninjas.com/v1/recipe?query={query}'
-        headers = {'X-Api-Key': 'fu5PEROkHGyBvuAVmwP2fg==2Vzh8WiMIidH9W80'}  # Replace 'YOUR_API_KEY' with your actual API key
+        headers = {'X-Api-Key': 'fu5PEROkHGyBvuAVmwP2fg==2Vzh8WiMIidH9W80'}
         response = requests.get(api_url, headers=headers)
 
-        # Parse JSON response
         if response.status_code == 200:
             data = response.json()
-            recipes_data = data  # Assign data directly to recipes_data
+            recipes_data = data
             recipes = []
             for recipe_data in recipes_data:
-                # Format recipe data
                 recipe = {
                     'title': recipe_data.get('title', ''),
                     'ingredients': recipe_data.get('ingredients', ''),
@@ -146,7 +191,6 @@ def receitas():
     else:
         recipes = []
 
-    # Render template with updated recipe data
     return render_template('receitas.html', recipes=recipes)
 
 @app.route('/')
@@ -155,6 +199,5 @@ def index():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Create database tables for our data models
+        db.create_all()
     app.run(debug=True)
-
