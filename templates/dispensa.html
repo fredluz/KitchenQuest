@@ -25,6 +25,11 @@
             <input type="text" name="new_name" placeholder="New name" required>
             <button type="submit" class="button receitas">Rename Ingredient</button>
         </form>
+        <form method="POST" action="/add_ingredient_manual">
+            <input type="text" name="name" placeholder="Ingredient name" required>
+            <input type="text" name="quantity" placeholder="Quantity (e.g., 1 kg)" required>
+            <button type="submit" class="button receitas">Add Ingredient Manually</button>
+        </form>
         <table class="ingredient-table">
             <thead>
                 <tr>

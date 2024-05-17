@@ -37,6 +37,10 @@ def add_ingredient():
     if product_data:
         product_id = product_data['id']
         product_name = product_data['product_name']
+        quantity = product_data['quantity']
+        
+        # Normalize the quantity input
+        normalized_quantity = normalize_quantity(quantity)
         
         # Fetch the ingredient by its unique id
         existing_ingredient = Ingredient.query.filter_by(id=product_id).first()
@@ -44,8 +48,18 @@ def add_ingredient():
         if existing_ingredient:
             # Ingredient exists, update quantity
             try:
-                new_quantity = int(existing_ingredient.quantity.split()[0]) + int(product_data['quantity'].split()[0])
-                existing_ingredient.quantity = f"{new_quantity} {product_data['quantity'].split()[1]}"  # Assumes unit is always the same
+                # Split and parse the quantities
+                existing_quantity_value, existing_quantity_unit = existing_ingredient.quantity.split()
+                new_quantity_value, new_quantity_unit = normalized_quantity.split()
+                
+                # Ensure the units match (they should all be in grams now)
+                if existing_quantity_unit != new_quantity_unit:
+                    flash('Unit mismatch. Cannot add quantities with different units.', 'error')
+                    return redirect(url_for('dispensa'))
+                
+                # Update the quantity
+                updated_quantity_value = int(existing_quantity_value) + int(new_quantity_value)
+                existing_ingredient.quantity = f"{updated_quantity_value} {new_quantity_unit}"
                 db.session.commit()
                 flash('Ingredient quantity updated successfully!', 'success')
             except Exception as e:
@@ -57,7 +71,7 @@ def add_ingredient():
             new_ingredient = Ingredient(
                 id=product_id,
                 name=product_name,
-                quantity=product_data['quantity'],
+                quantity=normalized_quantity,
                 expiration_date=expiration_date
             )
             db.session.add(new_ingredient)
@@ -72,6 +86,80 @@ def add_ingredient():
     else:
         flash('Failed to fetch product data', 'error')
         return redirect(url_for('add_ingredient'))
+
+
+@app.route('/add_ingredient_manual', methods=['POST'])
+def add_ingredient_manual():
+    name = request.form.get('name')
+    quantity = request.form.get('quantity')
+    
+    # Normalize the quantity input
+    normalized_quantity = normalize_quantity(quantity)
+    
+    # Check if the ingredient with the same name exists
+    existing_ingredient = Ingredient.query.filter_by(name=name).first()
+    
+    if existing_ingredient:
+        try:
+            # Split and parse the quantities
+            existing_quantity_value, existing_quantity_unit = existing_ingredient.quantity.split()
+            new_quantity_value, new_quantity_unit = normalized_quantity.split()
+            
+            # Ensure the units match (they should all be in grams now)
+            if existing_quantity_unit != new_quantity_unit:
+                flash('Unit mismatch. Cannot add quantities with different units.', 'error')
+                return redirect(url_for('dispensa'))
+            
+            # Update the quantity
+            updated_quantity_value = int(existing_quantity_value) + int(new_quantity_value)
+            existing_ingredient.quantity = f"{updated_quantity_value} {new_quantity_unit}"
+            db.session.commit()
+            flash('Ingredient quantity updated successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating ingredient: {str(e)}', 'error')
+    else:
+        # No existing ingredient, create a new one
+        new_ingredient = Ingredient(
+            name=name,
+            quantity=normalized_quantity,
+            expiration_date='Unknown'  # Default value for expiration date
+        )
+        db.session.add(new_ingredient)
+        try:
+            db.session.commit()
+            flash('New ingredient added successfully!', 'success')
+        except SQLAlchemy.exc.IntegrityError as e:
+            db.session.rollback()
+            flash(f'There was an issue adding the ingredient: {str(e)}', 'error')
+    
+    return redirect(url_for('dispensa'))
+
+
+def normalize_quantity(quantity):
+    # Split the quantity into value and unit
+    parts = quantity.split()
+    
+    # If the unit is attached to the value (like "300g"), separate them
+    if len(parts) == 1:
+        value = ''.join(filter(str.isdigit, parts[0]) + '.' if ',' in parts[0] else filter(str.isdigit, parts[0]))
+        unit = ''.join(filter(str.isalpha, parts[0]))
+    else:
+        value, unit = parts
+
+    # Replace commas with periods in the value
+    value = value.replace(',', '.')
+    
+    # Convert value to float for calculations
+    value = float(value)
+    unit = unit.strip().lower()
+    
+    if unit in ['kg', 'kilogram', 'kilograms']:
+        value *= 1000  # Convert kg to g
+        unit = 'g'
+
+    # Ensure there's a space between the value and unit
+    return f"{int(value)} {unit}"
 
 
 import requests
