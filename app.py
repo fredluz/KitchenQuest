@@ -36,7 +36,7 @@ def add_ingredient():
     product_data = fetch_product(code)
     if product_data:
         product_id = product_data['id']
-        generic_name = product_data['generic_name']
+        product_name = product_data['product_name']
         
         # Fetch the ingredient by its unique id
         existing_ingredient = Ingredient.query.filter_by(id=product_id).first()
@@ -56,7 +56,7 @@ def add_ingredient():
             expiration_date = product_data.get('expiration_date', 'Unknown')
             new_ingredient = Ingredient(
                 id=product_id,
-                name=generic_name,
+                name=product_name,
                 quantity=product_data['quantity'],
                 expiration_date=expiration_date
             )
@@ -82,11 +82,11 @@ def fetch_product(code):
     if response.ok:
         data = response.json()
         product = data.get('product', {})
-        generic_name = product.get('generic_name')
+        product_name = product.get('product_name')
         quantity = product.get('quantity')
         product_id = product.get('id')  # Fetch the unique id of the product
         # Return a dictionary with the data
-        return {'id': int(product_id), 'generic_name': generic_name, 'quantity': quantity}
+        return {'id': int(product_id), 'product_name': product_name, 'quantity': quantity}
     else:
         return None
 
