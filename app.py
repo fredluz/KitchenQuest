@@ -36,10 +36,6 @@ def dispensa():
 def social():
     return render_template('social.html')
 
-@app.route('/foryou')
-def foryou():
-    return render_template('foryou.html')
-
 @app.route('/add_ingredient', methods=['POST'])
 def add_ingredient():
     code = request.form.get('code')
@@ -266,6 +262,24 @@ def recipes():
 
     return render_template('recipes.html', recipe_details=recipe_details, ingredients=ingredients_in_pantry, normalize_quantity=normalize_quantity)
 
+@app.route('/for-you')
+def for_you():
+    recipes = Recipe.query.all()
+    ingredients_in_pantry = Ingredient.query.all()
+    available_recipes = []
+
+    for recipe in recipes:
+        ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe.id).all()
+        can_make = True
+        for recipe_ingredient in ingredients:
+            ingredient = Ingredient.query.filter_by(name=recipe_ingredient.ingredient_name).first()
+            if not ingredient or int(normalize_quantity(ingredient.quantity).split()[0]) < int(normalize_quantity(recipe_ingredient.quantity).split()[0]):
+                can_make = False
+                break
+        if can_make:
+            available_recipes.append({'recipe': recipe, 'ingredients': ingredients})
+
+    return render_template('for-you.html', available_recipes=available_recipes)
 
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
