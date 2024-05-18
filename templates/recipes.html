@@ -4,141 +4,13 @@
     <meta charset="UTF-8">
     <title>Recipes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
-    <style>
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        header {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 8px 8px 0 0;
-        }
-        form {
-            margin: 20px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        form input[type="text"], form input[type="number"], form textarea, form button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-        }
-        form button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background-color: #e0d212;
-        }
-        .voltar button {
-            background-color: #0f1bf5;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .voltar button:hover {
-            background-color: #e0d212;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px 0;
-            color: white;
-            background-color: #4CAF50;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .button:hover {
-            background-color: #d3ca16;
-        }
-        .button:disabled {
-            background-color: #cccccc;
-            color: #666666;
-            cursor: not-allowed;
-        }
-        .ingredient-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .insufficient {
-            background-color: #FFCC00;
-            color: black;
-        }
-        .sufficient {
-            background-color: #86c488;
-            color: white;
-        }
-        .missing-ingredient {
-            background-color: #FF5722;
-            color: white;
-        }
-        .ingredient-status {
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin: 5px 0;
-        }
-        .recipe-unavailable {
-            background-color: #950a00;
-            color: white;
-        }
-        .search-bar {
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-        }
-        .search-bar input[type="text"] {
-            padding: 10px;
-            font-size: 16px;
-            width: 50%;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="header">
             <h1>Recipes</h1>
         </header>
-        <a href="{{ url_for('index') }}" class="voltar button">Voltar</a>
+        <a href="{{ url_for('index') }}" class="button button-voltar">Voltar</a>
 
         <h2>Add Recipe</h2>
         <form method="POST" action="{{ url_for('add_recipe') }}">
@@ -150,55 +22,56 @@
                     <input type="text" name="quantity" placeholder="Quantity (e.g., 500 g)" required>
                 </div>
             </div>
-            <button type="button" id="add-ingredient-button">Add Another Ingredient</button>
-            <button type="submit">Add Recipe</button>
+            <button type="button" id="add-ingredient-button" class="button button-dispensa">Add Another Ingredient</button>
+            <button type="submit" class="button button-dispensa">Add Recipe</button>
         </form>
 
         <h2>Recipes</h2>
         <div class="search-bar">
             <input type="text" id="recipe-search" placeholder="Search for recipes...">
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Recipe</th>
-                    <th>Ingredients</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="recipe-table">
-                {% for item in recipe_details %}
-                <tr class="{{ 'recipe-unavailable' if item.status == 'insufficient' else 'sufficient' }}">
-                    <td>{{ item.recipe.name }}</td>
-                    <td>
-                        <ul>
-                            {% for ingredient in item.ingredients %}
-                            {% set pantry_ingredient = ingredients | selectattr('name', 'equalto', ingredient.ingredient_name) | first %}
-                            {% if not pantry_ingredient %}
-                            <li>
-                                <span class="ingredient-status missing-ingredient">Missing</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
-                            </li>
-                            {% elif normalize_quantity(pantry_ingredient.quantity).split()[0] | int < normalize_quantity(ingredient.quantity).split()[0] | int %}
-                            <li>
-                                <span class="ingredient-status insufficient">Insufficient</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
-                            </li>
-                            {% else %}
-                            <li>
-                                <span class="ingredient-status sufficient">Sufficient</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
-                            </li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </td>
-                    <td>
-                        <form method="POST" action="{{ url_for('cook_recipe', recipe_id=item.recipe.id) }}">
-                            <button type="submit" class="button" {% if item.status == 'insufficient' %}disabled{% endif %}>Cook</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Recipe</th>
+                        <th>Ingredients</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recipe-table">
+                    {% for item in recipe_details %}
+                    <tr class="{{ 'recipe-unavailable' if item.status == 'insufficient' else 'sufficient' }}">
+                        <td>{{ item.recipe.name }}</td>
+                        <td>
+                            <ul>
+                                {% for ingredient in item.ingredients %}
+                                {% set pantry_ingredient = ingredients | selectattr('name', 'equalto', ingredient.ingredient_name) | first %}
+                                {% if not pantry_ingredient %}
+                                <li>
+                                    <span class="ingredient-status missing-ingredient">Missing</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
+                                </li>
+                                {% elif normalize_quantity(pantry_ingredient.quantity).split()[0] | int < normalize_quantity(ingredient.quantity).split()[0] | int %}
+                                <li>
+                                    <span class="ingredient-status insufficient">Insufficient</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
+                                </li>
+                                {% else %}
+                                <li>
+                                    <span class="ingredient-status sufficient">Sufficient</span> {{ ingredient.quantity }} of {{ ingredient.ingredient_name }}
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('cook_recipe', recipe_id=item.recipe.id) }}">
+                            <button type="submit"  class="button {{ 'button-disabled' if item.status == 'insufficient' else '' }}" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;" {{ 'disabled' if item.status == 'insufficient' }}>Cook</button></form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -213,7 +86,6 @@
             document.querySelector('.ingredient-group').appendChild(ingredientGroup);
         });
 
-        // Search functionality
         document.getElementById('recipe-search').addEventListener('input', function() {
             var searchValue = this.value.toLowerCase();
             var recipes = document.querySelectorAll('#recipe-table tr');

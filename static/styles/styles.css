@@ -1,64 +1,229 @@
-  body {
-    font-family: Helvetica, sans-serif;
-    background-color: #fdebd0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-  }
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
 
-  .logo {
-    margin-bottom: 30px;
-    max-width: 100%;
-    height: auto;
-  }
-  
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #dfe6e9;
+}
 
-  .button {
-    display: block;
-    width: 60%;
-    padding: 20px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-size: 1.5em;
-    text-align: center;
-    text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: 0.3s;
-  }
+.container {
+  position: relative;
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  z-index: 1;
+  margin: 0 auto;
+}
 
-  .button:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  }
+.logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 20px;
+}
 
-  .dispensa {
-    background-color: #4CAF50; /* Green */
-  }
+.button {
+  display: inline-block;
+  width: 80%;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 18px;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  transition: background-color 0.3s ease;
+  background-color: #4CAF50;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
 
-  .receitas {
-    background-color: #f44336; /* Red */
-    display: block; /* Make the button a block-level element */
-    margin: 0 auto; /* Auto margins on the sides will center the button */
-  
-  }
+.button:hover {
+  background-color: #45a049;
+}
 
-  .for-you {
-    background-color: #ffeb3b; /* Yellow */
-    color: black; /* Override text color for visibility on yellow */
-  }
+.button-dispensa {
+  background-color: #4CAF50;
+}
 
-  .social {
-    background-color: #2196F3; /* Blue */
-  }
+.button-dispensa:hover {
+  background-color: #45a049;
+}
 
-  .centered {
-    text-align: center;
-    padding: 50px;
-    box-sizing: border-box;
-  }
-  
+.button-receitas {
+  background-color: #e74c3c;
+}
+
+.button-receitas:hover {
+  background-color: #c0392b;
+}
+
+.button-for-you {
+  background-color: #f1c40f;
+  color: #333;
+}
+
+.button-for-you:hover {
+  background-color: #d4ac0d;
+}
+
+.button-voltar {
+  background-color: #130ff1;
+  color: #f4f4f4;
+}
+
+.button-voltar:hover {
+  background-color: #190fd0;
+}
+
+.header {
+  text-align: center;
+  padding: 20px 0;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.recipe-card, .ingredient-group {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recipe-card:hover, .ingredient-group:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.recipe-card h3, .ingredient-group h3 {
+  margin-top: 0;
+  color: #4CAF50;
+  font-size: 1.5em;
+}
+
+.recipe-card ul, .ingredient-group ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.recipe-card li, .ingredient-group li {
+  margin: 5px 0;
+}
+
+.recipe-card button, .ingredient-group button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.recipe-card button:hover, .ingredient-group button:hover {
+  background-color: #d3ca16;
+}
+
+.button-disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.search-bar {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.search-bar input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  width: 45%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.button-clear {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.button-clear:hover {
+  background-color: #c0392b;
+}
+
+.insufficient {
+  background-color: #FFCC00;
+  color: black;
+}
+
+.sufficient {
+  background-color: #86c488;
+  color: white;
+}
+
+.missing-ingredient {
+  background-color: #FF5722;
+  color: white;
+}
+
+.ingredient-status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.recipe-unavailable {
+  background-color: #950a00;
+  color: white;
+}
