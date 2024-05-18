@@ -1,21 +1,31 @@
-import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm.exc import NoResultFound
-
+from flask_migrate import Migrate
+import requests 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pantry.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'key_maraca'  # Ensure to set a secure secret key.
+app.secret_key = 'supersecretkey'
 
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 
 class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    quantity = db.Column(db.String(100), nullable=False)
-    expiration_date = db.Column(db.String(100), nullable=True)  # Allow NULL values
+    quantity = db.Column(db.String(50), nullable=False)
+    expiration_date = db.Column(db.String(50))
+
+class Recipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True)
+    
+class RecipeIngredient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', name='fk_recipeingredient_recipe'), nullable=False)
+    ingredient_name = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(50), nullable=False)
 
 @app.route('/dispensa')
 def dispensa():
@@ -153,16 +163,15 @@ def normalize_quantity(quantity):
     # Convert value to float for calculations
     value = float(value)
     unit = unit.strip().lower()
-    
+    if unit in ['litros', 'l', 'L']:
+        value *= 1  # Convert l to L
+        unit = 'L'
     if unit in ['kg', 'kilogram', 'kilograms']:
         value *= 1000  # Convert kg to g
         unit = 'g'
 
     # Ensure there's a space between the value and unit
     return f"{int(value)} {unit}"
-
-
-import requests
 
 def fetch_product(code):
     url = f"https://world.openfoodfacts.org/api/v2/product/{code}.json"
@@ -240,46 +249,80 @@ def clear_ingredients():
 
 
 
-class Recipe(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    instructions = db.Column(db.Text, nullable=False)
-    ingredients = db.relationship('Ingredient', secondary='recipe_ingredient', backref='recipes')
+@app.route('/recipes')
+def recipes():
+    recipes = Recipe.query.all()
+    ingredients_in_pantry = Ingredient.query.all()
+    recipe_details = []
+    for recipe in recipes:
+        ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe.id).all()
+        status = 'sufficient'
+        for recipe_ingredient in ingredients:
+            ingredient = Ingredient.query.filter_by(name=recipe_ingredient.ingredient_name).first()
+            if not ingredient or int(normalize_quantity(ingredient.quantity).split()[0]) < int(normalize_quantity(recipe_ingredient.quantity).split()[0]):
+                status = 'insufficient'
+                break
+        recipe_details.append({'recipe': recipe, 'ingredients': ingredients, 'status': status})
 
-# Define association table for many-to-many relationship
-recipe_ingredient = db.Table('recipe_ingredient',
-    db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'), primary_key=True),
-    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id'), primary_key=True)
-)
+    return render_template('recipes.html', recipe_details=recipe_details, ingredients=ingredients_in_pantry, normalize_quantity=normalize_quantity)
 
 
-@app.route('/receitas', methods=['GET', 'POST'])
-def receitas():
-    if request.method == 'GET':
-        query = request.args.get('query')
-        api_url = f'https://api.api-ninjas.com/v1/recipe?query={query}'
-        headers = {'X-Api-Key': 'fu5PEROkHGyBvuAVmwP2fg==2Vzh8WiMIidH9W80'}
-        response = requests.get(api_url, headers=headers)
+@app.route('/add_recipe', methods=['POST'])
+def add_recipe():
+    name = request.form.get('name')
+    new_recipe = Recipe(name=name)
+    db.session.add(new_recipe)
+    db.session.commit()
+    
+    ingredients = request.form.getlist('ingredient_name')
+    quantities = request.form.getlist('quantity')
+    
+    for ingredient_name, quantity in zip(ingredients, quantities):
+        if ingredient_name and quantity:
+            new_ingredient = RecipeIngredient(recipe_id=new_recipe.id, ingredient_name=ingredient_name, quantity=quantity)
+            db.session.add(new_ingredient)
+    
+    db.session.commit()
+    flash('Recipe added successfully!', 'success')
+    return redirect(url_for('recipes'))
 
-        if response.status_code == 200:
-            data = response.json()
-            recipes_data = data
-            recipes = []
-            for recipe_data in recipes_data:
-                recipe = {
-                    'title': recipe_data.get('title', ''),
-                    'ingredients': recipe_data.get('ingredients', ''),
-                    'servings': recipe_data.get('servings', ''),
-                    'instructions': recipe_data.get('instructions', '')
-                }
-                recipes.append(recipe)
+@app.route('/cook_recipe/<int:recipe_id>', methods=['POST'])
+def cook_recipe(recipe_id):
+    recipe = Recipe.query.get(recipe_id)
+    recipe_ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
+    for recipe_ingredient in recipe_ingredients:
+        ingredient = Ingredient.query.filter_by(name=recipe_ingredient.ingredient_name).first()
+        if ingredient:
+            normalized_pantry_quantity = normalize_quantity(ingredient.quantity)
+            normalized_recipe_quantity = normalize_quantity(recipe_ingredient.quantity)
+
+            pantry_quantity_value, pantry_quantity_unit = normalized_pantry_quantity.split()
+            recipe_quantity_value, recipe_quantity_unit = normalized_recipe_quantity.split()
+
+            if pantry_quantity_unit != recipe_quantity_unit:
+                flash('Unit mismatch in recipe and pantry ingredients.', 'error')
+                return redirect(url_for('recipes'))
+
+            updated_quantity_value = int(pantry_quantity_value) - int(recipe_quantity_value)
+            if updated_quantity_value < 0:
+                flash(f'Not enough {ingredient.name} to cook {recipe.name}.', 'error')
+                return redirect(url_for('recipes'))
+
+            if updated_quantity_value == 0:
+                db.session.delete(ingredient)
+            else:
+                ingredient.quantity = f"{updated_quantity_value} {pantry_quantity_unit}"
+
+            db.session.commit()
         else:
-            recipes = []
+            flash(f'Ingredient {recipe_ingredient.ingredient_name} not found in pantry.', 'error')
+            return redirect(url_for('recipes'))
 
-    else:
-        recipes = []
+    flash(f'Successfully cooked {recipe.name}!', 'success')
+    return redirect(url_for('recipes'))
 
-    return render_template('receitas.html', recipes=recipes)
+
+
 
 @app.route('/')
 def index():

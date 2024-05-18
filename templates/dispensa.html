@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pantry Management</title>
+    <title>Gestão de Dispensa</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
     <style>
         body {
@@ -81,7 +81,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Pantry Management</h1>
+            <h1>Gestão Dispensa</h1>
         </header>
         <form method="POST" action="/clear_ingredients">
             <button type="submit" onclick="return confirm('Are you sure you want to delete all ingredients?');">Clear All Ingredients</button>
@@ -107,7 +107,7 @@
 
         <form method="POST" action="/add_ingredient_manual">
             <input type="text" name="name" placeholder="Ingredient name" required>
-            <input type="text" name="quantity" placeholder="Quantity (e.g., 1 kg)" required>
+            <input type="text" name="quantity" placeholder="Quantity (e.g.,  500g)" required>
             <button type="submit">Add Ingredient Manually</button>
         </form>
         
